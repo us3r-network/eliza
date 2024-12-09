@@ -34,7 +34,7 @@ else
 fi
 
 # List of folders to exclude
-EXCLUDED_FOLDERS=("create-eliza-app" "debug_audio" "content_cache")
+EXCLUDED_FOLDERS=("create-eliza-app" "debug_audio" "content_cache" "plugin-0g" "plugin-aptos" "plugin-buttplug" "plugin-coinbase" "plugin-conflux" "plugin-evm" "plugin-goat" "plugin-icp" "plugin-image-generation" "plugin-solana" "plugin-starknet" "plugin-tee" "client-auto" "client-discord" "client-twitter" "adapter-postgres" "adapter-supabase" "adapter-sqljs")
 
 # Iterate over all other subdirectories in the packages folder
 for PACKAGE in "$PACKAGES_DIR"/*; do
