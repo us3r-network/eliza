@@ -7,7 +7,7 @@ import {
     ModelClass,
     State,
     composeContext,
-    generateImage,
+    // generateImage,
     generateObjectDEPRECATED,
     type Action,
 } from "@ai16z/eliza";
@@ -17,7 +17,6 @@ export interface CreateTokenContent extends Content {
         name: string;
         symbol: string;
         description: string;
-        image_description: string;
     };
 }
 
@@ -43,9 +42,10 @@ const create = async ({
     tokenMetadata: CreateTokenMetadata;
 }) => {
     console.log("Creating token...", fid, tokenMetadata);
+
     return {
         success: true,
-        ca: "test",
+        ca: "0x0000000000000000000000000000000000000000",
         creator: "test",
         error: null,
     };
@@ -86,8 +86,8 @@ const promptConfirmation = async (): Promise<boolean> => {
 };
 
 // Save the base64 data to a file
-import * as fs from "fs";
-import * as path from "path";
+// import * as fs from "fs";
+// import * as path from "path";
 import { createTokenTemplate } from "../templetes/index.ts";
 import { CreateTokenMetadata } from "../types/index.ts";
 
@@ -95,10 +95,11 @@ export const createTokenAction: Action = {
     name: "CREATE_TOKEN",
     similes: ["DEPLOY_TOKEN", "LAUNCH_TOKEN"],
     validate: async (_runtime: IAgentRuntime, _message: Memory) => {
-        console.log("Validating CREATE_TOKEN action...", _runtime, _message);
+        console.log("Validating CREATE_TOKEN action...", _message);
         return true; //return isCreateTokenContent(runtime, message.content);
     },
-    description: "Create a new token. Requires token metadata.",
+    description:
+        "Create a new token. Requires deployer farcaster fid and token metadata.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -106,15 +107,14 @@ export const createTokenAction: Action = {
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
     ): Promise<boolean> => {
-        console.log("Starting CREATE_TOKEN handler...");
-
+        console.log("Starting CREATE_TOKEN handler...", message);
         // Compose state if not provided
         if (!state) {
             state = (await runtime.composeState(message)) as State;
         } else {
             state = await runtime.updateRecentMessageState(state);
         }
-
+        console.log("CREATE_TOKEN State: ", state);
         // Generate structured content from natural language
         const context = composeContext({
             state,
@@ -126,7 +126,7 @@ export const createTokenAction: Action = {
             context,
             modelClass: ModelClass.SMALL,
         });
-        console.log("Generated content:", content);
+        console.log("CREATE_TOKEN content:", content);
 
         // Validate the generated content
         if (!isCreateTokenContent(runtime, content)) {
@@ -158,7 +158,7 @@ export const createTokenAction: Action = {
                     return false;
                 }
             } */
-
+        /*
         const imageResult = await generateImage(
             {
                 prompt: `logo for ${tokenMetadata.name} (${tokenMetadata.symbol}) token - ${tokenMetadata.description}`,
@@ -190,13 +190,14 @@ export const createTokenAction: Action = {
         }
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: "image/png" });
+        */
 
         // Add the default decimals and convert file to Blob
         const fullTokenMetadata: CreateTokenMetadata = {
             name: tokenMetadata.name,
             symbol: tokenMetadata.symbol,
             description: tokenMetadata.description,
-            file: blob,
+            // file: blob,
         };
 
         try {
@@ -208,7 +209,7 @@ export const createTokenAction: Action = {
 
             console.log("Executing create transaction...");
             const result = await createToken({
-                fid: 1619,
+                fid: 16169,
                 tokenMetadata: fullTokenMetadata,
             });
 
@@ -258,21 +259,21 @@ export const createTokenAction: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "Create a new token called GLITCHIZA with symbol GLITCHIZA and generate a description about it. Also come up with a description for it to use for image generation.",
+                    text: "Create a new token called GLITCHIZA with symbol GLITCHIZA and generate a description about it.",
                 },
             },
             {
                 user: "{{user2}}",
                 content: {
-                    text: "Token GLITCHIZA (GLITCHIZA) created successfully!\nContract Address: 3kD5DN4bbA3nykb1abjS66VF7cYZkKdirX8bZ6ShJjBB\nCreator: 9jW8FPr6BSSsemWPV22UUCzSqkVdTp6HTyPqeqyuBbCa\nView at: https://castcoin.fun/0x3kD5DN4bbA3nykb1abjS66VF7cYZkKdirX8bZ6ShJjBB",
+                    text: "Token GLITCHIZA (GLITCHIZA) is creating......\n",
                     action: "CREATE_TOKEN",
                     content: {
-                        tokenInfo: {
+                        tokenMetadata: {
                             symbol: "GLITCHIZA",
-                            address:
-                                "EugPwuZ8oUMWsYHeBGERWvELfLGFmA1taDtmY8uMeX6r",
-                            creator:
-                                "9jW8FPr6BSSsemWPV22UUCzSqkVdTp6HTyPqeqyuBbCa",
+                            // address:
+                            //     "EugPwuZ8oUMWsYHeBGERWvELfLGFmA1taDtmY8uMeX6r",
+                            // creator:
+                            //     "9jW8FPr6BSSsemWPV22UUCzSqkVdTp6HTyPqeqyuBbCa",
                             name: "GLITCHIZA",
                             description: "A GLITCHIZA token",
                         },
