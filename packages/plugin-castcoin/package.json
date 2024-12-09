@@ -1,5 +1,5 @@
 {
-    "name": "@ai16z/plugin-castcoin",
+    "name": "@us3r/plugin-castcoin",
     "version": "0.0.0",
     "main": "dist/index.js",
     "type": "module",
