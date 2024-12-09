@@ -91,7 +91,7 @@ import * as path from "path";
 import { createTokenTemplate } from "../templetes/index.ts";
 import { CreateTokenMetadata } from "../types/index.ts";
 
-export default {
+export const createTokenAction: Action = {
     name: "CREATE_TOKEN",
     similes: ["DEPLOY_TOKEN", "LAUNCH_TOKEN"],
     validate: async (_runtime: IAgentRuntime, _message: Memory) => {
@@ -282,4 +282,4 @@ export default {
             },
         ],
     ] as ActionExample[][],
-} as Action;
+};
