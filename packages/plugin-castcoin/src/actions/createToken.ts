@@ -8,7 +8,7 @@ import {
     State,
     composeContext,
     generateImage,
-    generateObject,
+    generateObjectDEPRECATED,
     type Action,
 } from "@ai16z/eliza";
 
@@ -98,8 +98,7 @@ export const createTokenAction: Action = {
         console.log("Validating CREATE_TOKEN action...", _runtime, _message);
         return true; //return isCreateTokenContent(runtime, message.content);
     },
-    description:
-        "Create a new token. Requires deployer info and token metadata.",
+    description: "Create a new token. Requires token metadata.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -122,7 +121,7 @@ export const createTokenAction: Action = {
             template: createTokenTemplate,
         });
 
-        const content = await generateObject({
+        const content = await generateObjectDEPRECATED({
             runtime,
             context,
             modelClass: ModelClass.SMALL,

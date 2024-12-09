@@ -91,10 +91,6 @@ fi
 for FOLDER in "${WORKING_FOLDERS[@]}"; do
   PACKAGE="$PACKAGES_DIR/$FOLDER"
 
-# Iterate over all other subdirectories in the packages folder
-for PACKAGE in "$PACKAGES_DIR"/*; do
-  PACKAGE_NAME=$(basename "$PACKAGE")
-
   # Check if the folder exists and add the command
   if [ -d "$PACKAGE" ]; then
     COMMANDS+=("pnpm --dir $PACKAGE dev -- $*")

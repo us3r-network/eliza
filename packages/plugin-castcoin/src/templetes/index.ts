@@ -8,7 +8,7 @@ Example response:
         "symbol": "TEST",
         "description": "A test token",
     },
-    "buyAmountSol": "0.00069"}
+}
 \`\`\`
 
 {{recentMessages}}
