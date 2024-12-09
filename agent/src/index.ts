@@ -26,6 +26,7 @@ import {
 import { zgPlugin } from "@ai16z/plugin-0g";
 import { goatPlugin } from "@ai16z/plugin-goat";
 import { bootstrapPlugin } from "@ai16z/plugin-bootstrap";
+import { castcoinPlugin } from "@ai16z/plugin-castcoin";
 // import { buttplugPlugin } from "@ai16z/plugin-buttplug";
 import {
     coinbaseCommercePlugin,
