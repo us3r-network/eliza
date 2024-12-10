@@ -68,7 +68,7 @@ export const createTokenAction: Action = {
         } else {
             state = await runtime.updateRecentMessageState(state);
         }
-        console.log("CREATE_TOKEN State: ", state);
+        // console.log("CREATE_TOKEN State: ", state);
         // Generate structured content from natural language
         const context = composeContext({
             state,
@@ -163,7 +163,9 @@ export const createTokenAction: Action = {
 
             console.log("Executing create api call...");
             const result = await createMeme({
-                castHash: "0x0000000000000000000000000000000000000000",
+                castHash:
+                    (message.content.hash as `0x${string}`) ||
+                    "0x0000000000000000000000000000000000000000",
                 tokenMetadata: fullTokenMetadata,
             });
 
