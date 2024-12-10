@@ -34,53 +34,6 @@ export function isCreateTokenContent(
     );
 }
 
-const create = async ({
-    fid,
-    tokenMetadata,
-}: {
-    fid: number;
-    tokenMetadata: CreateTokenMetadata;
-}) => {
-    console.log("Creating token...", fid, tokenMetadata);
-
-    return {
-        success: true,
-        ca: "0x0000000000000000000000000000000000000000",
-        creator: "test",
-        error: null,
-    };
-};
-
-export const createToken = async ({
-    fid,
-    tokenMetadata,
-}: {
-    fid: number;
-    tokenMetadata: CreateTokenMetadata;
-}) => {
-    const createTokenResult = await create({
-        fid,
-        tokenMetadata,
-    });
-    console.log("Create Results: ", createTokenResult);
-
-    if (createTokenResult.success) {
-        return {
-            success: true,
-            ca: createTokenResult.ca,
-            creator: createTokenResult.creator,
-        };
-    } else {
-        console.log("Create failed");
-        return {
-            success: false,
-            error: createTokenResult.error,
-            ca: createTokenResult.ca,
-            creator: createTokenResult.creator,
-        };
-    }
-};
-
 const promptConfirmation = async (): Promise<boolean> => {
     return true;
 };
@@ -90,6 +43,7 @@ const promptConfirmation = async (): Promise<boolean> => {
 // import * as path from "path";
 import { createTokenTemplate } from "../templetes/index.ts";
 import { CreateTokenMetadata } from "../types/index.ts";
+import { createMeme } from "../utils.ts";
 
 export const createTokenAction: Action = {
     name: "CREATE_TOKEN",
@@ -207,21 +161,23 @@ export const createTokenAction: Action = {
                 return false;
             }
 
-            console.log("Executing create transaction...");
-            const result = await createToken({
-                fid: 16169,
+            console.log("Executing create api call...");
+            const result = await createMeme({
+                castHash: "0x0000000000000000000000000000000000000000",
                 tokenMetadata: fullTokenMetadata,
             });
+
+            console.log("Create api call result: ", result);
 
             if (callback) {
                 if (result.success) {
                     callback({
-                        text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\nContract Address: ${result.ca}\nCreator: ${result.creator}\nView at: https://castcoin.fun/${result.ca}`,
+                        text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\n Creator: ${result.data.creator}\n View at: https://castcoin.fun/${result.data.base.tokenAddress}`,
                         content: {
                             tokenInfo: {
                                 symbol: tokenMetadata.symbol,
-                                address: result.ca,
-                                creator: result.creator,
+                                address: result.data.address,
+                                creator: result.data.creator,
                                 name: tokenMetadata.name,
                                 description: tokenMetadata.description,
                                 timestamp: Date.now(),
@@ -230,18 +186,13 @@ export const createTokenAction: Action = {
                     });
                 } else {
                     callback({
-                        text: `Failed to create token: ${result.error}\nAttempted mint address: ${result.ca}`,
+                        text: `Failed to create token: ${result.error}\n`,
                         content: {
                             error: result.error,
-                            mintAddress: result.ca,
                         },
                     });
                 }
             }
-
-            // Log success message with token view URL
-            const successMessage = `Token created successfully! View at: `;
-            console.log(successMessage);
             return result.success;
         } catch (error) {
             if (callback) {
