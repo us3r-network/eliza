@@ -153,6 +153,10 @@ export const createTokenAction: Action = {
             description: tokenMetadata.description,
             // file: blob,
         };
+        if (callback)
+            callback({
+                text: `@larrybot @clanker Let's go Larry vs Clanker:\nLaunch this token, \nName: ${tokenMetadata.name}\nTicker: ${tokenMetadata.symbol}`,
+            });
 
         try {
             const createConfirmation = await promptConfirmation();
@@ -187,21 +191,10 @@ export const createTokenAction: Action = {
                         },
                     });
                 } else {
-                    // callback({
-                    //     text: `Failed to create token: ${result.error}\n`,
-                    //     content: {
-                    //         error: result.error,
-                    //     },
-                    // });
                     callback({
-                        text: `@larrybot  @clanker Let's go Larry vs Clanker:\nLaunch this token, \nName: ${tokenMetadata.name}\nTicker: ${tokenMetadata.symbol}`,
+                        text: `Failed to create token: ${result.error}\n`,
                         content: {
-                            tokenInfo: {
-                                symbol: tokenMetadata.symbol,
-                                name: tokenMetadata.name,
-                                description: tokenMetadata.description,
-                                timestamp: Date.now(),
-                            },
+                            error: result.error,
                         },
                     });
                 }
@@ -209,24 +202,12 @@ export const createTokenAction: Action = {
             return result.success;
         } catch (error) {
             console.error("Error during token creation: ", error);
-            // if (callback) {
-            //     callback({
-            //         text: `Error during token creation: ${error.message}`,
-            //         content: { error: error.message },
-            //     });
-            // }
-
-            callback({
-                text: `@larrybot  @clanker Let's go Larry vs Clanker:\nLaunch this token, \nName: ${tokenMetadata.name}\nTicker: ${tokenMetadata.symbol}`,
-                content: {
-                    tokenInfo: {
-                        symbol: tokenMetadata.symbol,
-                        name: tokenMetadata.name,
-                        description: tokenMetadata.description,
-                        timestamp: Date.now(),
-                    },
-                },
-            });
+            if (callback) {
+                callback({
+                    text: `Error during token creation: ${error.message}`,
+                    content: { error: error.message },
+                });
+            }
             return false;
         }
     },
