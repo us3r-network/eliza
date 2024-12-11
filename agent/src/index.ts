@@ -385,9 +385,9 @@ export async function createAgent(
         throw new Error("Invalid TEE configuration");
     }
 
-    const goatPlugin = await createGoatPlugin((secret) =>
-        getSecret(character, secret)
-    );
+    // const goatPlugin = await createGoatPlugin((secret) =>
+    //     getSecret(character, secret)
+    // );
 
     return new AgentRuntime({
         databaseAdapter: db,
@@ -398,11 +398,11 @@ export async function createAgent(
         plugins: [
             bootstrapPlugin,
             castcoinPlugin,
+            nodePlugin,
             /*
             getSecret(character, "CONFLUX_CORE_PRIVATE_KEY")
                 ? confluxPlugin
                 : null,
-            nodePlugin,
             getSecret(character, "SOLANA_PUBLIC_KEY") ||
             (getSecret(character, "WALLET_PUBLIC_KEY") &&
                 !getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))
