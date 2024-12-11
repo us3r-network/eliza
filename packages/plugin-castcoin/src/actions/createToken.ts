@@ -187,22 +187,46 @@ export const createTokenAction: Action = {
                         },
                     });
                 } else {
+                    // callback({
+                    //     text: `Failed to create token: ${result.error}\n`,
+                    //     content: {
+                    //         error: result.error,
+                    //     },
+                    // });
                     callback({
-                        text: `Failed to create token: ${result.error}\n`,
+                        text: `@larrybot  @clanker Let's go Larry vs Clanker:\nLaunch this token, \nName: ${tokenMetadata.name}\nTicker: ${tokenMetadata.symbol}`,
                         content: {
-                            error: result.error,
+                            tokenInfo: {
+                                symbol: tokenMetadata.symbol,
+                                name: tokenMetadata.name,
+                                description: tokenMetadata.description,
+                                timestamp: Date.now(),
+                            },
                         },
                     });
                 }
             }
             return result.success;
         } catch (error) {
-            if (callback) {
-                callback({
-                    text: `Error during token creation: ${error.message}`,
-                    content: { error: error.message },
-                });
-            }
+            console.error("Error during token creation: ", error);
+            // if (callback) {
+            //     callback({
+            //         text: `Error during token creation: ${error.message}`,
+            //         content: { error: error.message },
+            //     });
+            // }
+
+            callback({
+                text: `@larrybot  @clanker Let's go Larry vs Clanker:\nLaunch this token, \nName: ${tokenMetadata.name}\nTicker: ${tokenMetadata.symbol}`,
+                content: {
+                    tokenInfo: {
+                        symbol: tokenMetadata.symbol,
+                        name: tokenMetadata.name,
+                        description: tokenMetadata.description,
+                        timestamp: Date.now(),
+                    },
+                },
+            });
             return false;
         }
     },
