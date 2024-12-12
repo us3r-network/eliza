@@ -27,6 +27,7 @@ import {
 import { zgPlugin } from "@ai16z/plugin-0g";
 import createGoatPlugin from "@ai16z/plugin-goat";
 import { bootstrapPlugin } from "@ai16z/plugin-bootstrap";
+import { castcoinPlugin } from "@us3r/plugin-castcoin";
 // import { intifacePlugin } from "@ai16z/plugin-intiface";
 import {
     coinbaseCommercePlugin,
@@ -384,9 +385,9 @@ export async function createAgent(
         throw new Error("Invalid TEE configuration");
     }
 
-    const goatPlugin = await createGoatPlugin((secret) =>
-        getSecret(character, secret)
-    );
+    // const goatPlugin = await createGoatPlugin((secret) =>
+    //     getSecret(character, secret)
+    // );
 
     return new AgentRuntime({
         databaseAdapter: db,
@@ -396,10 +397,12 @@ export async function createAgent(
         character,
         plugins: [
             bootstrapPlugin,
+            castcoinPlugin,
+            nodePlugin,
+            /*
             getSecret(character, "CONFLUX_CORE_PRIVATE_KEY")
                 ? confluxPlugin
                 : null,
-            nodePlugin,
             getSecret(character, "SOLANA_PUBLIC_KEY") ||
             (getSecret(character, "WALLET_PUBLIC_KEY") &&
                 !getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))
@@ -442,6 +445,7 @@ export async function createAgent(
                 ? flowPlugin
                 : null,
             getSecret(character, "APTOS_PRIVATE_KEY") ? aptosPlugin : null,
+            */
         ].filter(Boolean),
         providers: [],
         actions: [],
