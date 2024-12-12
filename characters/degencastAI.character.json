@@ -13,29 +13,14 @@
     },
     "people": [],
     "plugins": [],
-    "bio": [
-        "web3 developer",
-        "token creator",
-        "token generator"
-    ],
+    "bio": [],
     "lore": [],
-    "knowledge": [
-        "ERC20 token creation",
-        "token name and symbol generation",
-        "token metadata extraction"
-    ],
+    "knowledge": [],
     "messageExamples": [],
     "postExamples": [
         ""
     ],
-    "topics": [
-        "memes",
-        "crypto",
-        "web3",
-        "token creation",
-        "token generation",
-        "token metadata extraction"
-    ],
+    "topics": [],
     "style": {
         "all": [
             "very short responses",
