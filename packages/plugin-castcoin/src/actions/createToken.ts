@@ -47,9 +47,14 @@ import { createMeme } from "../utils.ts";
 
 export const createTokenAction: Action = {
     name: "CREATE_TOKEN",
-    similes: ["DEPLOY_TOKEN", "LAUNCH_TOKEN"],
+    similes: [
+        "CREATED_TOKEN",
+        "DEPLOY_TOKEN",
+        "LAUNCH_TOKEN",
+        "LAUNCHED_TOKEN",
+    ],
     validate: async (_runtime: IAgentRuntime, _message: Memory) => {
-        console.log("Validating CREATE_TOKEN action...", _message);
+        // console.log("Validating CREATE_TOKEN action...", _message);
         return true; //return isCreateTokenContent(runtime, message.content);
     },
     description:
@@ -153,10 +158,6 @@ export const createTokenAction: Action = {
             description: tokenMetadata.description,
             // file: blob,
         };
-        if (callback)
-            callback({
-                text: `@larrybot @clanker Let's go Larry vs Clanker:\nLaunch this token, \nName: ${tokenMetadata.name}\nTicker: ${tokenMetadata.symbol}`,
-            });
 
         try {
             const createConfirmation = await promptConfirmation();
@@ -178,17 +179,7 @@ export const createTokenAction: Action = {
             if (callback) {
                 if (result.success) {
                     callback({
-                        text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\n Creator: ${result.data.creator}\n View at: https://castcoin.fun/${result.data.base.tokenAddress}`,
-                        content: {
-                            tokenInfo: {
-                                symbol: tokenMetadata.symbol,
-                                address: result.data.address,
-                                creator: result.data.creator,
-                                name: tokenMetadata.name,
-                                description: tokenMetadata.description,
-                                timestamp: Date.now(),
-                            },
-                        },
+                        text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\n Creator: ${result.data?.deployerFcName}\n View at: \nhttps://dev.degencast.fun/memes/${result.data?.id}`,
                     });
                 } else {
                     callback({
@@ -228,14 +219,83 @@ export const createTokenAction: Action = {
                     content: {
                         tokenMetadata: {
                             symbol: "GLITCHIZA",
-                            // address:
-                            //     "EugPwuZ8oUMWsYHeBGERWvELfLGFmA1taDtmY8uMeX6r",
-                            // creator:
-                            //     "9jW8FPr6BSSsemWPV22UUCzSqkVdTp6HTyPqeqyuBbCa",
                             name: "GLITCHIZA",
                             description: "A GLITCHIZA token",
                         },
                     },
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Launch this token, \nName: test-token\nTicker: TEST",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "Creating Token test-token (TEST)......\n",
+                    action: "CREATE_TOKEN",
+                    content: {
+                        tokenMetadata: {
+                            symbol: "TEST",
+                            name: "test-token",
+                            description: "A test token",
+                        },
+                    },
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Create a meme token called PEPE with symbol $PEPE",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "Creating Token PEPE ($PEPE)......\n",
+                    action: "CREATE_TOKEN",
+                    content: {
+                        tokenMetadata: {
+                            symbol: "PEPE",
+                            name: "PEPE",
+                            description:
+                                "A meme token inspired by the famous Pepe the Frog",
+                        },
+                    },
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "create token", // Invalid example - insufficient info
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "I need more information to create a token. Please provide:\n- Token name\n- Token symbol/ticker\n- (Optional) Token description",
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "Create token with symbol !@#$%", // Invalid example - invalid symbol
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "Invalid token symbol. Token symbols should only contain letters and numbers.",
                 },
             },
         ],
