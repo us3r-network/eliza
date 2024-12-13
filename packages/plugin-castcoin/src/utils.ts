@@ -27,7 +27,7 @@ export const createMeme = async ({
         const createTokenRespData = await createTokenResp.json();
         console.log("Create Results:", createTokenRespData);
 
-        if (createTokenRespData.msg !== "ok" || !createTokenRespData.data?.id) {
+        if (createTokenRespData.code !== 0 || !createTokenRespData.data?.id) {
             console.log("Create failed");
             return {
                 success: false,

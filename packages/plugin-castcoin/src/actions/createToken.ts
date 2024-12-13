@@ -49,9 +49,11 @@ export const createTokenAction: Action = {
     name: "CREATE_TOKEN",
     similes: [
         "CREATED_TOKEN",
+        "TOKEN_CREATION",
         "DEPLOY_TOKEN",
         "LAUNCH_TOKEN",
         "LAUNCHED_TOKEN",
+        "TOKEN_CREATED",
     ],
     validate: async (_runtime: IAgentRuntime, _message: Memory) => {
         // console.log("Validating CREATE_TOKEN action...", _message);
@@ -178,8 +180,17 @@ export const createTokenAction: Action = {
 
             if (callback) {
                 if (result.success) {
+                    const deployerName = result.data?.deployerFcName;
+                    const id = result.data?.base?.tokenAddress
+                        ? result.data.base.tokenAddress
+                        : result.data?.solana?.tokenAddress
+                          ? result.data.solana.tokenAddress
+                          : result.data?.id;
+                    const url = id
+                        ? `https://dev.degencast.fun/memes/${id}`
+                        : `https://dev.degencast.fun`;
                     callback({
-                        text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\n Creator: ${result.data?.deployerFcName}\n View at: \nhttps://dev.degencast.fun/memes/${result.data?.id}`,
+                        text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\n Creator: ${deployerName}\n View at: \n${url}`,
                     });
                 } else {
                     callback({
@@ -208,13 +219,13 @@ export const createTokenAction: Action = {
             {
                 user: "{{user1}}",
                 content: {
-                    text: "Create a new token called GLITCHIZA with symbol GLITCHIZA and generate a description about it.",
+                    text: "Create a new token called GLITCHIZA with symbol GLITCHIZA.",
                 },
             },
             {
                 user: "{{user2}}",
                 content: {
-                    text: "Token GLITCHIZA (GLITCHIZA) is creating......\n",
+                    text: "",
                     action: "CREATE_TOKEN",
                     content: {
                         tokenMetadata: {
@@ -236,7 +247,7 @@ export const createTokenAction: Action = {
             {
                 user: "{{user2}}",
                 content: {
-                    text: "Creating Token test-token (TEST)......\n",
+                    text: "",
                     action: "CREATE_TOKEN",
                     content: {
                         tokenMetadata: {
@@ -258,7 +269,7 @@ export const createTokenAction: Action = {
             {
                 user: "{{user2}}",
                 content: {
-                    text: "Creating Token PEPE ($PEPE)......\n",
+                    text: "",
                     action: "CREATE_TOKEN",
                     content: {
                         tokenMetadata: {
@@ -271,33 +282,33 @@ export const createTokenAction: Action = {
                 },
             },
         ],
-        [
-            {
-                user: "{{user1}}",
-                content: {
-                    text: "create token", // Invalid example - insufficient info
-                },
-            },
-            {
-                user: "{{user2}}",
-                content: {
-                    text: "I need more information to create a token. Please provide:\n- Token name\n- Token symbol/ticker\n- (Optional) Token description",
-                },
-            },
-        ],
-        [
-            {
-                user: "{{user1}}",
-                content: {
-                    text: "Create token with symbol !@#$%", // Invalid example - invalid symbol
-                },
-            },
-            {
-                user: "{{user2}}",
-                content: {
-                    text: "Invalid token symbol. Token symbols should only contain letters and numbers.",
-                },
-            },
-        ],
+        // [
+        //     {
+        //         user: "{{user1}}",
+        //         content: {
+        //             text: "create token", // Invalid example - insufficient info
+        //         },
+        //     },
+        //     {
+        //         user: "{{user2}}",
+        //         content: {
+        //             text: "I need more information to create a token. Please provide:\n- Token name\n- Token symbol/ticker\n- (Optional) Token description",
+        //         },
+        //     },
+        // ],
+        // [
+        //     {
+        //         user: "{{user1}}",
+        //         content: {
+        //             text: "Create token with symbol !@#$%", // Invalid example - invalid symbol
+        //         },
+        //     },
+        //     {
+        //         user: "{{user2}}",
+        //         content: {
+        //             text: "Invalid token symbol. Token symbols should only contain letters and numbers.",
+        //         },
+        //     },
+        // ],
     ] as ActionExample[][],
 };
