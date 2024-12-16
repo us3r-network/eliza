@@ -18,7 +18,9 @@ export const formatTimeline = (
 ${timeline.map(formatCast).join("\n")}
 `;
 
-export const headerTemplate = `
+export const headerTemplate = `# Action Examples
+{{actionExamples}}
+
 {{timeline}}
 
 # Knowledge
@@ -30,13 +32,14 @@ About {{agentName}} (@{{farcasterUsername}}):
 {{postDirections}}
 
 {{providers}}
+{{actions}}
 
 {{recentPosts}}
 
 {{characterPostExamples}}`;
 
 export const postTemplate =
-headerTemplate +
+    headerTemplate +
     `
 # Task: Generate a post in the voice and style of {{agentName}}, aka @{{farcasterUsername}}
 Write a single sentence post that is {{adjective}} about {{topic}} (without mentioning {{topic}} directly), from the perspective of {{agentName}}.
