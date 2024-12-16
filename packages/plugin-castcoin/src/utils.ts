@@ -9,9 +9,16 @@ export const createMeme = async ({
     castHash,
     tokenMetadata,
 }: {
-    castHash: `0x${string}`;
+    castHash: `0x${string}` | undefined;
     tokenMetadata: CreateTokenMetadata;
 }) => {
+    if (!castHash) {
+        return {
+            success: false,
+            error: "Cast hash is required",
+        };
+    }
+
     try {
         console.log("Creating token...", castHash, tokenMetadata);
 
@@ -68,6 +75,53 @@ export const createMeme = async ({
             success: false,
             error: "Max attempts reached",
         };
+    } catch (error) {
+        console.error("Error creating meme:", error);
+        return {
+            success: false,
+            error: error.message || "Unknown error occurred",
+        };
+    }
+};
+
+export const airdrop = async ({
+    castHash,
+}: {
+    castHash: `0x${string}` | undefined;
+}) => {
+    if (!castHash) {
+        return {
+            success: false,
+            error: "Cast hash is required",
+        };
+    }
+
+    try {
+        console.log("requesting airdrop", castHash);
+
+        const resp = await fetch(CASTCOIN_API_URL + "airdrop", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ castHash }),
+        });
+
+        const respData = await resp.json();
+        console.log("Create Results:", respData);
+
+        if (respData.code !== 0) {
+            console.log("Create failed");
+            return {
+                success: false,
+                error: respData.msg || "Unknown error",
+            };
+        } else {
+            return {
+                success: true,
+                data: respData.data,
+            };
+        }
     } catch (error) {
         console.error("Error creating meme:", error);
         return {
