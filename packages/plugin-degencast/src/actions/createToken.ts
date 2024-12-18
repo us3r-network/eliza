@@ -8,7 +8,7 @@ import {
     State,
     composeContext,
     // generateImage,
-    generateObjectDEPRECATED,
+    generateObjectDeprecated,
     type Action,
 } from "@ai16z/eliza";
 
@@ -82,7 +82,7 @@ export const createTokenAction: Action = {
             template: createTokenTemplate,
         });
 
-        const content = await generateObjectDEPRECATED({
+        const content = await generateObjectDeprecated({
             runtime,
             context,
             modelClass: ModelClass.SMALL,
