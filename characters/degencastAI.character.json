@@ -1,7 +1,6 @@
 {
     "name": "degencast.ai",
     "clients": [
-        "direct",
         "farcaster"
     ],
     "modelProvider": "ali_bailian",
