@@ -42,8 +42,8 @@ const promptConfirmation = async (): Promise<boolean> => {
 // import * as fs from "fs";
 // import * as path from "path";
 import { createTokenTemplate } from "../templetes/index.ts";
-import { CreateTokenMetadata } from "../types/index.ts";
-import { createMeme } from "../utils.ts";
+import { ApiRespCode, CreateTokenMetadata } from "../types/index.ts";
+import { createMeme, DEGENCAST_WEB_URL } from "../utils.ts";
 
 export const createTokenAction: Action = {
     name: "CREATE_TOKEN",
@@ -179,7 +179,7 @@ export const createTokenAction: Action = {
             console.log("Create api call result: ", result);
 
             if (callback) {
-                if (result.success) {
+                if (result.code === ApiRespCode.SUCCESS) {
                     const deployerName = result.data?.deployerFcName;
                     const id = result.data?.base?.tokenAddress
                         ? result.data.base.tokenAddress
@@ -187,21 +187,18 @@ export const createTokenAction: Action = {
                           ? result.data.solana.tokenAddress
                           : result.data?.id;
                     const url = id
-                        ? `https://dev.degencast.fun/memes/${id}`
-                        : `https://dev.degencast.fun`;
+                        ? `${DEGENCAST_WEB_URL}/memes/${id}`
+                        : `${DEGENCAST_WEB_URL}`;
                     callback({
                         text: `Token ${tokenMetadata.name} (${tokenMetadata.symbol}) created successfully!\n Creator: ${deployerName}\n View at: \n${url}`,
                     });
                 } else {
                     callback({
-                        text: `Failed to create token: ${result.error}\n`,
-                        content: {
-                            error: result.error,
-                        },
+                        text: `Failed to create token: ${result.msg}\n`,
                     });
                 }
             }
-            return result.success;
+            return result.code === ApiRespCode.SUCCESS;
         } catch (error) {
             console.error("Error during token creation: ", error);
             if (callback) {

@@ -7,7 +7,8 @@ import {
     type Action,
 } from "@ai16z/eliza";
 
-import { airdrop } from "../utils.ts";
+import { airdrop, DEGENCAST_WEB_URL } from "../utils.ts";
+import { ApiRespCode } from "../types/index.ts";
 
 export const airdropAction: Action = {
     name: "AIRDROP",
@@ -40,28 +41,27 @@ export const airdropAction: Action = {
             console.log("airdrop api call result: ", result);
 
             if (callback) {
-                if (result.success) {
-                    const id = result.data?.base?.tokenAddress
-                        ? result.data.base.tokenAddress
-                        : result.data?.solana?.tokenAddress
-                          ? result.data.solana.tokenAddress
-                          : result.data?.id;
-                    const url = id
-                        ? `https://dev.degencast.fun/memes/${id}`
-                        : `https://dev.degencast.fun`;
+                if (result.code === ApiRespCode.SUCCESS) {
+                    const id = result.data?.baseCastTokenAddress
+                        ? result.data.baseCastTokenAddress
+                        : result.data?.solanaCastTokenAddress
+                          ? result.data.solanaCastTokenAddress
+                          : undefined;
+                    const tokenDetailUrl = id
+                        ? `${DEGENCAST_WEB_URL}/memes/${id}`
+                        : `${DEGENCAST_WEB_URL}`;
+                    const txUrls = `${result.data?.baseClaimTxHash || ""}\n${result.data?.solanaClaimTxHash || ""}`;
+
                     callback({
-                        text: `Airdrop successfully!\n View at: \n${url}`,
+                        text: `${result.msg}\n View at: \n${tokenDetailUrl}\n\nTx Links: \n${txUrls}`,
                     });
                 } else {
                     callback({
-                        text: `airdrop failed: ${result.error}\n`,
-                        content: {
-                            error: result.error,
-                        },
+                        text: `${result.msg}`,
                     });
                 }
             }
-            return result.success;
+            return result.code === ApiRespCode.SUCCESS;
         } catch (error) {
             console.error("Error during airdrop request: ", error);
             if (callback) {

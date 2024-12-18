@@ -1,6 +1,13 @@
-import { CreateTokenMetadata } from "./types";
+import {
+    AirDropData,
+    ApiResp,
+    ApiRespCode,
+    CreateTokenData,
+    CreateTokenMetadata,
+} from "./types";
 
-const DEGENCAST_API_URL = "https://api-dev.pgf.meme/";
+export const DEGENCAST_API_URL = "https://api-dev.pgf.meme/";
+export const DEGENCAST_WEB_URL = "https://degencast.ai/";
 
 const FIRST_ATTEMPT_DELAY = 3000;
 const MAX_ATTEMPTS = 6;
@@ -12,11 +19,11 @@ export const createMeme = async ({
 }: {
     castHash: `0x${string}` | undefined;
     tokenMetadata: CreateTokenMetadata;
-}) => {
+}): Promise<ApiResp<CreateTokenData>> => {
     if (!castHash) {
         return {
-            success: false,
-            error: "Cast hash is required",
+            code: ApiRespCode.ERROR,
+            msg: "Cast hash is required",
         };
     }
 
@@ -58,11 +65,8 @@ export const createMeme = async ({
             const memeRespData = await memeResp.json();
             console.log("Meme Results:", memeRespData);
 
-            if (memeRespData.msg === "ok") {
-                return {
-                    success: true,
-                    data: memeRespData.data,
-                };
+            if (memeRespData.code === ApiRespCode.SUCCESS) {
+                return memeRespData;
             }
 
             if (attempts < MAX_ATTEMPTS - 1) {
@@ -73,14 +77,14 @@ export const createMeme = async ({
         }
 
         return {
-            success: false,
-            error: "Max attempts reached",
+            code: ApiRespCode.ERROR,
+            msg: "Max attempts reached",
         };
     } catch (error) {
         console.error("Error creating meme:", error);
         return {
-            success: false,
-            error: error.message || "Unknown error occurred",
+            code: ApiRespCode.ERROR,
+            msg: error.message || "Unknown error occurred",
         };
     }
 };
@@ -89,18 +93,18 @@ export const airdrop = async ({
     castHash,
 }: {
     castHash: `0x${string}` | undefined;
-}) => {
+}): Promise<ApiResp<AirDropData>> => {
     if (!castHash) {
         return {
-            success: false,
-            error: "Cast hash is required",
+            code: ApiRespCode.ERROR,
+            msg: "Cast hash is required",
         };
     }
 
     try {
         console.log("requesting airdrop", castHash);
 
-        const resp = await fetch(DEGENCAST_API_URL + "airdrop", {
+        const resp = await fetch(DEGENCAST_API_URL + "memes/airdrops", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -109,25 +113,13 @@ export const airdrop = async ({
         });
 
         const respData = await resp.json();
-        console.log("Create Results:", respData);
-
-        if (respData.code !== 0) {
-            console.log("Create failed");
-            return {
-                success: false,
-                error: respData.msg || "Unknown error",
-            };
-        } else {
-            return {
-                success: true,
-                data: respData.data,
-            };
-        }
+        console.log("Airdrop Results:", respData);
+        return respData;
     } catch (error) {
-        console.error("Error creating meme:", error);
+        console.error("Error airdrop:", error);
         return {
-            success: false,
-            error: error.message || "Unknown error occurred",
+            code: ApiRespCode.ERROR,
+            msg: error.message || "Unknown error occurred",
         };
     }
 };
