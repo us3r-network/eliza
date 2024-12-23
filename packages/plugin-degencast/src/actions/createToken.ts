@@ -10,7 +10,7 @@ import {
     // generateImage,
     generateObjectDeprecated,
     type Action,
-} from "@ai16z/eliza";
+} from "@elizaos/core";
 
 export interface CreateTokenContent extends Content {
     tokenMetadata: {

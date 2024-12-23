@@ -5,7 +5,7 @@ import {
     Memory,
     State,
     type Action,
-} from "@ai16z/eliza";
+} from "@elizaos/core";
 
 import { airdrop, DEGENCAST_WEB_URL } from "../utils.ts";
 import { ApiRespCode } from "../types/index.ts";
