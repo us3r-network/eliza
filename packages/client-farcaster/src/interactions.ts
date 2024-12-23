@@ -9,10 +9,10 @@ import {
     ModelClass,
     stringToUuid,
     type IAgentRuntime,
-} from "@ai16z/eliza";
+} from "@elizaos/core";
+import type { FarcasterClient } from "./client";
 import { toHex } from "viem";
 import { sendCast } from "./actions";
-import type { FarcasterClient } from "./client";
 import { buildConversationThread, createCastMemory } from "./memory";
 import {
     formatCast,

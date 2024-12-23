@@ -2,7 +2,7 @@ import {
     Character,
     messageCompletionFooter,
     shouldRespondFooter,
-} from "@ai16z/eliza";
+} from "@elizaos/core";
 import type { Cast } from "./types";
 
 export const formatCast = (cast: Cast) => {
