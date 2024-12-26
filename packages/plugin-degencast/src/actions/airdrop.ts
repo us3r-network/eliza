@@ -90,5 +90,65 @@ export const airdropAction: Action = {
                 },
             },
         ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "airdrop me some $CAST",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "",
+                    action: "AIRDROP",
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "requesting airdrop",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "",
+                    action: "AIRDROP",
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "claim airdrop",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "",
+                    action: "AIRDROP",
+                },
+            },
+        ],
+        [
+            {
+                user: "{{user1}}",
+                content: {
+                    text: "claim $CAST airdrop",
+                },
+            },
+            {
+                user: "{{user2}}",
+                content: {
+                    text: "",
+                    action: "AIRDROP",
+                },
+            },
+        ],
     ] as ActionExample[][],
 };
