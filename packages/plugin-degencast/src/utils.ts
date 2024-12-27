@@ -6,8 +6,8 @@ import {
     CreateTokenMetadata,
 } from "./types";
 
-export const DEGENCAST_API_URL = "https://api-dev.pgf.meme/";
-export const DEGENCAST_WEB_URL = "https://degencast.ai/";
+export const DEGENCAST_API_URL = "https://api-dev.pgf.meme";
+export const DEGENCAST_WEB_URL = "https://degencast.ai";
 
 const FIRST_ATTEMPT_DELAY = 3000;
 const MAX_ATTEMPTS = 6;
@@ -31,7 +31,7 @@ export const createMeme = async ({
         console.log("Creating token...", castHash, tokenMetadata);
 
         // Create token request
-        const createTokenResp = await fetch(DEGENCAST_API_URL + "memes", {
+        const createTokenResp = await fetch(DEGENCAST_API_URL + "/memes", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export const createMeme = async ({
 
         // Poll for meme status
         for (let attempts = 0; attempts < MAX_ATTEMPTS; attempts++) {
-            const memeResp = await fetch(DEGENCAST_API_URL + "memes/" + id);
+            const memeResp = await fetch(DEGENCAST_API_URL + "/memes/" + id);
             const memeRespData = await memeResp.json();
             console.log("Meme Results:", memeRespData);
 
@@ -104,7 +104,7 @@ export const airdrop = async ({
     try {
         console.log("requesting airdrop", castHash);
 
-        const resp = await fetch(DEGENCAST_API_URL + "memes/airdrops", {
+        const resp = await fetch(DEGENCAST_API_URL + "/memes/airdrops", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
