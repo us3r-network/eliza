@@ -6,7 +6,7 @@ import {
     CreateTokenMetadata,
 } from "./types";
 
-export const DEGENCAST_API_URL = "https://api-dev.pgf.meme";
+export const DEGENCAST_API_URL = "https://api-dev.degencast.fun";
 export const DEGENCAST_WEB_URL = "https://degencast.ai";
 
 const FIRST_ATTEMPT_DELAY = 3000;
