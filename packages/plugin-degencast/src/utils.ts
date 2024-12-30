@@ -1,5 +1,6 @@
 import {
     AirDropData,
+    AirdropStatus,
     ApiResp,
     ApiRespCode,
     CreateTokenData,
@@ -114,6 +115,43 @@ export const airdrop = async ({
 
         const respData = await resp.json();
         console.log("Airdrop Results:", respData);
+        return respData;
+    } catch (error) {
+        console.error("Error airdrop:", error);
+        return {
+            code: ApiRespCode.ERROR,
+            msg: error.message || "Unknown error occurred",
+        };
+    }
+};
+
+export const getAirdropStatus = async ({
+    castHash,
+}: {
+    castHash: `0x${string}` | undefined;
+}): Promise<ApiResp<AirdropStatus>> => {
+    if (!castHash) {
+        return {
+            code: ApiRespCode.ERROR,
+            msg: "Cast hash is required",
+        };
+    }
+
+    try {
+        console.log("get cast author airdrop status", castHash);
+
+        const resp = await fetch(
+            DEGENCAST_API_URL + "/memes/airdrop/users?castHash=" + castHash,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        const respData = await resp.json();
+        // console.log("Airdrop Status:", respData);
         return respData;
     } catch (error) {
         console.error("Error airdrop:", error);

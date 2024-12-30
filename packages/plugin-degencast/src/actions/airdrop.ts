@@ -1,14 +1,31 @@
 import {
     ActionExample,
+    // booleanFooter,
+    // composeContext,
+    // generateTrueOrFalse,
     HandlerCallback,
     IAgentRuntime,
     Memory,
+    // ModelClass,
     State,
     type Action,
 } from "@elizaos/core";
 
-import { airdrop, DEGENCAST_WEB_URL } from "../utils.ts";
-import { ApiRespCode } from "../types/index.ts";
+import { airdrop, getAirdropStatus, DEGENCAST_WEB_URL } from "../utils.ts";
+import { ApiRespCode, ClaimStatus } from "../types/index.ts";
+
+// export const shouldAirdropTemplate =
+//     `Based on the conversation so far:
+
+// {{recentMessages}}
+
+// Should {{agentName}} proceed with the airdrop?
+// Respond with YES if:
+// - The user has both Base and Solana addresses bound
+// - OR the user has one address bound and explicitly indicated to skip the airdrop for the other chain
+
+// Otherwise, respond with NO.
+// ` + booleanFooter;
 
 export const airdropAction: Action = {
     name: "AIRDROP",
@@ -16,14 +33,15 @@ export const airdropAction: Action = {
     validate: async (_runtime: IAgentRuntime, _message: Memory) => {
         return true;
     },
-    description: "request an airdrop.",
+    description:
+        "start an $CAST token airdrop to user. Once triggered by a user, subsequent messages from the same user in the conversation will also trigger this action.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
         state: State,
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
-    ): Promise<boolean> => {
+    ) => {
         console.log("Starting AIRDROP handler...", message);
         // Compose state if not provided
         if (!state) {
@@ -32,45 +50,116 @@ export const airdropAction: Action = {
             state = await runtime.updateRecentMessageState(state);
         }
 
-        try {
-            console.log("Executing airdrop api call...");
-            const result = await airdrop({
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async function _shouldAirdrop(state: State): Promise<boolean> {
+            // console.log("Checking airdrop status...", state);
+            // get airdrop status
+            const airdropStatusResp = await getAirdropStatus({
                 castHash: message.content.hash as `0x${string}`,
             });
-
-            console.log("airdrop api call result: ", result);
-
-            if (callback) {
-                if (result.code === ApiRespCode.SUCCESS) {
-                    const id = result.data?.baseCastTokenAddress
-                        ? result.data.baseCastTokenAddress
-                        : result.data?.solanaCastTokenAddress
-                          ? result.data.solanaCastTokenAddress
-                          : undefined;
-                    const tokenDetailUrl = id
-                        ? `${DEGENCAST_WEB_URL}/memes/${id}`
-                        : `${DEGENCAST_WEB_URL}`;
-                    const txUrls = `${result.data?.baseClaimTxHash || ""}\n${result.data?.solanaClaimTxHash || ""}`;
-
+            // console.log("Airdrop Status:", airdropStatusResp);
+            // Check if the user has verified their addresses
+            if (
+                airdropStatusResp.code !== ApiRespCode.SUCCESS ||
+                !airdropStatusResp.data ||
+                airdropStatusResp.data.claimStatus !== ClaimStatus.UNCLAIMED
+            ) {
+                callback({
+                    text: airdropStatusResp.msg,
+                });
+                return false;
+            }
+            // const shouldAirdropContext = composeContext({
+            //     state,
+            //     template: shouldAirdropTemplate, // Define this template separately
+            // });
+            // const forceAirdrop = await generateTrueOrFalse({
+            //     runtime,
+            //     context: shouldAirdropContext,
+            //     modelClass: ModelClass.LARGE,
+            // });
+            const forceAirdrop = false;
+            const verifiedAddresses =
+                airdropStatusResp.data?.user?.verified_addresses;
+            console.log("Verified Addresses:", verifiedAddresses);
+            if (
+                verifiedAddresses?.eth_addresses?.length === 0 &&
+                verifiedAddresses?.sol_addresses?.length === 0
+            ) {
+                callback({
+                    text: "This airdrop is distributed on both Base and Solana. You have to verify your Base wallet address and Solana wallet address on Warpcast first before claiming.",
+                });
+                return false;
+            } else if (
+                verifiedAddresses?.eth_addresses?.length === 0 &&
+                verifiedAddresses?.sol_addresses?.length > 0
+            ) {
+                if (!forceAirdrop) {
                     callback({
-                        text: `${result.msg}\n View at: \n${tokenDetailUrl}\n\nTx Links: \n${txUrls}`,
+                        text: `This airdrop is distributed on both Base and Solana. You have already verified your Solana wallet address(${verifiedAddresses?.sol_addresses?.[0]}). You have to verify your Base address on Warpcast first before claiming.`,
                     });
-                } else {
+                    return false;
+                }
+            } else if (
+                verifiedAddresses?.eth_addresses?.length > 0 &&
+                verifiedAddresses?.sol_addresses?.length === 0
+            ) {
+                if (!forceAirdrop) {
                     callback({
-                        text: `${result.msg}`,
+                        text: `This airdrop is distributed on both Base and Solana. You have already verified your Base wallet address(${verifiedAddresses?.eth_addresses?.[0]}). You have to verify your Solana address on Warpcast first before claiming.`,
                     });
+                    return false;
                 }
             }
-            return result.code === ApiRespCode.SUCCESS;
-        } catch (error) {
-            console.error("Error during airdrop request: ", error);
-            if (callback) {
-                callback({
-                    text: `Error during airdrop request: ${error.message}`,
-                    content: { error: error.message },
+            return true;
+        }
+
+        // proceed with the airdrop
+        if (await _shouldAirdrop(state)) {
+            console.log("Executing airdrop api call...");
+            try {
+                const result = await airdrop({
+                    castHash: message.content.hash as `0x${string}`,
                 });
+                console.log("airdrop api call result: ", result);
+
+                if (callback) {
+                    if (result.code === ApiRespCode.SUCCESS) {
+                        const id = result.data?.baseCastTokenAddress
+                            ? result.data.baseCastTokenAddress
+                            : result.data?.solanaCastTokenAddress
+                              ? result.data.solanaCastTokenAddress
+                              : undefined;
+                        const tokenDetailUrl = id
+                            ? `${DEGENCAST_WEB_URL}/memes/${id}`
+                            : `${DEGENCAST_WEB_URL}`;
+                        const txUrls = `${result.data?.baseClaimTxHash || ""}\n${result.data?.solanaClaimTxHash || ""}`;
+
+                        callback({
+                            text: `${result.msg}\n View at: \n${tokenDetailUrl}\n\nTx Links: \n${txUrls}`,
+                        });
+                    } else {
+                        callback({
+                            text: `${result.msg}`,
+                        });
+                    }
+                }
+                return result.code === ApiRespCode.SUCCESS;
+            } catch (error: Error | unknown) {
+                console.error("Error during airdrop request: ", error);
+                if (callback) {
+                    callback({
+                        text: `Error during airdrop request: ${error instanceof Error ? error.message : String(error)}`,
+                        content: {
+                            error:
+                                error instanceof Error
+                                    ? error.message
+                                    : String(error),
+                        },
+                    });
+                }
+                return false;
             }
-            return false;
         }
     },
 
