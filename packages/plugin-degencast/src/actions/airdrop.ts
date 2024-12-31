@@ -1,5 +1,6 @@
 import {
     ActionExample,
+    elizaLogger,
     // booleanFooter,
     // composeContext,
     // generateTrueOrFalse,
@@ -54,10 +55,11 @@ export const airdropAction: Action = {
         async function _shouldAirdrop(state: State): Promise<boolean> {
             // console.log("Checking airdrop status...", state);
             // get airdrop status
+            console.log("Checking airdrop status...");
             const airdropStatusResp = await getAirdropStatus({
                 castHash: message.content.hash as `0x${string}`,
             });
-            // console.log("Airdrop Status:", airdropStatusResp);
+            elizaLogger.log("Airdrop Status:", airdropStatusResp);
             // Check if the user has verified their addresses
             if (
                 airdropStatusResp.code !== ApiRespCode.SUCCESS ||
@@ -81,13 +83,13 @@ export const airdropAction: Action = {
             const forceAirdrop = false;
             const verifiedAddresses =
                 airdropStatusResp.data?.user?.verified_addresses;
-            console.log("Verified Addresses:", verifiedAddresses);
+            // console.log("Verified Addresses:", verifiedAddresses);
             if (
                 verifiedAddresses?.eth_addresses?.length === 0 &&
                 verifiedAddresses?.sol_addresses?.length === 0
             ) {
                 callback({
-                    text: "This airdrop is distributed on both Base and Solana. You have to verify your Base wallet address and Solana wallet address on Warpcast first before claiming.",
+                    text: "You haven't connected any wallets yet. Please bind your Base and Solana wallets to claim your $CAST airdrop.",
                 });
                 return false;
             } else if (
@@ -95,8 +97,11 @@ export const airdropAction: Action = {
                 verifiedAddresses?.sol_addresses?.length > 0
             ) {
                 if (!forceAirdrop) {
+                    // callback({
+                    //     text: `This airdrop is distributed on both Base and Solana. You have already verified your Solana wallet address(${verifiedAddresses?.sol_addresses?.[0]}). You have to verify your Base address on Warpcast first before claiming.`,
+                    // });
                     callback({
-                        text: `This airdrop is distributed on both Base and Solana. You have already verified your Solana wallet address(${verifiedAddresses?.sol_addresses?.[0]}). You have to verify your Base address on Warpcast first before claiming.`,
+                        text: `You haven't connected both required wallets yet. Currently, only your Base or Solana wallet is connected. Please bind both wallets and try claiming again in 2 hours.`,
                     });
                     return false;
                 }
@@ -106,7 +111,7 @@ export const airdropAction: Action = {
             ) {
                 if (!forceAirdrop) {
                     callback({
-                        text: `This airdrop is distributed on both Base and Solana. You have already verified your Base wallet address(${verifiedAddresses?.eth_addresses?.[0]}). You have to verify your Solana address on Warpcast first before claiming.`,
+                        text: `You haven't connected both required wallets yet. Currently, only your Base or Solana wallet is connected. Please bind both wallets and try claiming again in 2 hours.`,
                     });
                     return false;
                 }
@@ -121,7 +126,7 @@ export const airdropAction: Action = {
                 const result = await airdrop({
                     castHash: message.content.hash as `0x${string}`,
                 });
-                console.log("airdrop api call result: ", result);
+                elizaLogger.log("Airdrop api call result: ", result);
 
                 if (callback) {
                     if (result.code === ApiRespCode.SUCCESS) {
@@ -146,7 +151,7 @@ export const airdropAction: Action = {
                 }
                 return result.code === ApiRespCode.SUCCESS;
             } catch (error: Error | unknown) {
-                console.error("Error during airdrop request: ", error);
+                elizaLogger.error("Error during airdrop request: ", error);
                 if (callback) {
                     callback({
                         text: `Error during airdrop request: ${error instanceof Error ? error.message : String(error)}`,
