@@ -1,6 +1,5 @@
 import {
     ActionExample,
-    Content,
     HandlerCallback,
     IAgentRuntime,
     Memory,
@@ -8,35 +7,18 @@ import {
     State,
     composeContext,
     // generateImage,
+    // generateObject,
     generateObjectDeprecated,
     type Action,
 } from "@elizaos/core";
+import { z } from "zod";
 
-export interface CreateTokenContent extends Content {
-    tokenMetadata: {
-        name: string;
-        symbol: string;
-        description: string;
-    };
-}
-
-export function isCreateTokenContent(
-    runtime: IAgentRuntime,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    content: any
-): content is CreateTokenContent {
-    console.log("Content for create", content);
-    return (
-        typeof content.tokenMetadata === "object" &&
-        content.tokenMetadata !== null &&
-        typeof content.tokenMetadata.name === "string" &&
-        typeof content.tokenMetadata.symbol === "string"
-    );
-}
-
-const promptConfirmation = async (): Promise<boolean> => {
-    return true;
-};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const TokenMetadataSchema = z.object({
+    name: z.string().min(3),
+    symbol: z.string().min(3),
+    description: z.string().min(10).optional(),
+});
 
 // Save the base64 data to a file
 // import * as fs from "fs";
@@ -60,14 +42,14 @@ export const createTokenAction: Action = {
         return true; //return isCreateTokenContent(runtime, message.content);
     },
     description:
-        "Create a new token. Requires deployer farcaster fid and token metadata.",
+        "Create a new token when explicitly requested. I'll automatically extract the token metadata from your message. If any required information is missing, I'll ask you for:\n- Token name (minimum 3 characters)\n- Token symbol/ticker (minimum 3 characters)\n- Token description (optional, but minimum 10 characters if provided).\nOnly trigger this when user explicitly asks to create/deploy/launch a token.\nOnce triggered by a user, subsequent messages from the same user in the conversation will also trigger this action.",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
         state: State,
         _options: { [key: string]: unknown },
         callback?: HandlerCallback
-    ): Promise<boolean> => {
+    ) => {
         console.log("Starting CREATE_TOKEN handler...", message);
         // Compose state if not provided
         if (!state) {
@@ -82,98 +64,32 @@ export const createTokenAction: Action = {
             template: createTokenTemplate,
         });
 
-        const content = await generateObjectDeprecated({
+        const tokenMetadata = (await generateObjectDeprecated({
             runtime,
             context,
-            modelClass: ModelClass.SMALL,
-        });
-        console.log("CREATE_TOKEN content:", content);
+            modelClass: ModelClass.LARGE,
+            // schema: TokenMetadataSchema,
+        })) as z.infer<typeof TokenMetadataSchema>;
 
-        // Validate the generated content
-        if (!isCreateTokenContent(runtime, content)) {
-            console.error("Invalid content for CREATE_TOKEN action.");
-            return false;
+        console.log("CREATE_TOKEN content:", tokenMetadata);
+
+        if (!tokenMetadata.name || !tokenMetadata.symbol) {
+            return {
+                text: "I need more information to create a token. Please provide:\n- Token name\n- Token symbol/ticker\n- (Optional) Token description",
+                action: "CREATE_TOKEN",
+                content: {
+                    tokenMetadata: tokenMetadata,
+                },
+            };
         }
-
-        const { tokenMetadata } = content;
-        /*
-            // Generate image if tokenMetadata.file is empty or invalid
-            if (!tokenMetadata.file || tokenMetadata.file.length < 100) {  // Basic validation
-                try {
-                    const imageResult = await generateImage({
-                        prompt: `logo for ${tokenMetadata.name} (${tokenMetadata.symbol}) token - ${tokenMetadata.description}`,
-                        width: 512,
-                        height: 512,
-                        count: 1
-                    }, runtime);
-
-                    if (imageResult.success && imageResult.data && imageResult.data.length > 0) {
-                        // Remove the "data:image/png;base64," prefix if present
-                        tokenMetadata.file = imageResult.data[0].replace(/^data:image\/[a-z]+;base64,/, '');
-                    } else {
-                        console.error("Failed to generate image:", imageResult.error);
-                        return false;
-                    }
-                } catch (error) {
-                    console.error("Error generating image:", error);
-                    return false;
-                }
-            } */
-        /*
-        const imageResult = await generateImage(
-            {
-                prompt: `logo for ${tokenMetadata.name} (${tokenMetadata.symbol}) token - ${tokenMetadata.description}`,
-                width: 256,
-                height: 256,
-                count: 1,
-            },
-            runtime
-        );
-
-        tokenMetadata.image_description = imageResult.data[0].replace(
-            /^data:image\/[a-z]+;base64,/,
-            ""
-        );
-
-        // Convert base64 string to Blob
-        const base64Data = tokenMetadata.image_description;
-        const outputPath = path.join(
-            process.cwd(),
-            `generated_image_${Date.now()}.txt`
-        );
-        fs.writeFileSync(outputPath, base64Data);
-        console.log(`Base64 data saved to: ${outputPath}`);
-
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: "image/png" });
-        */
-
-        // Add the default decimals and convert file to Blob
-        const fullTokenMetadata: CreateTokenMetadata = {
-            name: tokenMetadata.name,
-            symbol: tokenMetadata.symbol,
-            description: tokenMetadata.description,
-            // file: blob,
-        };
 
         try {
-            const createConfirmation = await promptConfirmation();
-            if (!createConfirmation) {
-                console.log("Create token canceled by user");
-                return false;
-            }
-
             console.log("Executing create api call...");
             const result = await createMeme({
                 castHash:
                     (message.content.hash as `0x${string}`) ||
                     "0x0000000000000000000000000000000000000000",
-                tokenMetadata: fullTokenMetadata,
+                tokenMetadata: tokenMetadata as CreateTokenMetadata,
             });
 
             console.log("Create api call result: ", result);

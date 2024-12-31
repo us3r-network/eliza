@@ -3,11 +3,9 @@ export const createTokenTemplate = `Respond with a JSON markdown block containin
 Example response:
 \`\`\`json
 {
-    "tokenMetadata": {
-        "name": "Test Token",
-        "symbol": "TEST",
-        "description": "A test token",
-    },
+    "name": "Test Token",
+    "symbol": "TEST",
+    "description": "A test token",
 }
 \`\`\`
 
