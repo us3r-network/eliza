@@ -60,6 +60,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
+import { degencastPlugin } from "@us3r/plugin-degencast";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -488,12 +489,9 @@ export async function createAgent(
         throw new Error("Invalid TEE configuration");
     }
 
-    let goatPlugin: any | undefined;
-    if (getSecret(character, "ALCHEMY_API_KEY")) {
-        goatPlugin = await createGoatPlugin((secret) =>
-            getSecret(character, secret)
-        );
-    }
+    // const goatPlugin = await createGoatPlugin((secret) =>
+    //     getSecret(character, secret)
+    // );
 
     return new AgentRuntime({
         databaseAdapter: db,
@@ -504,10 +502,12 @@ export async function createAgent(
         // character.plugins are handled when clients are added
         plugins: [
             bootstrapPlugin,
+            degencastPlugin,
+            nodePlugin,
+            /*
             getSecret(character, "CONFLUX_CORE_PRIVATE_KEY")
                 ? confluxPlugin
                 : null,
-            nodePlugin,
             getSecret(character, "SOLANA_PUBLIC_KEY") ||
             (getSecret(character, "WALLET_PUBLIC_KEY") &&
                 !getSecret(character, "WALLET_PUBLIC_KEY")?.startsWith("0x"))
@@ -571,6 +571,7 @@ export async function createAgent(
             getSecret(character, "TON_PRIVATE_KEY") ? tonPlugin : null,
             getSecret(character, "SUI_PRIVATE_KEY") ? suiPlugin : null,
             getSecret(character, "STORY_PRIVATE_KEY") ? storyPlugin : null,
+            */
         ].filter(Boolean),
         providers: [],
         actions: [],
